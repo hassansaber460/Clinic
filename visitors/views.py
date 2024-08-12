@@ -12,7 +12,7 @@ from visitors.models import Patient, PatientChronicDisease, MedicalRap
 
 def show_patient(request):
     get_patient = Patient.objects.all()
-    paginator = Paginator(get_patient, 12)
+    paginator = Paginator(get_patient, 5)
     page = request.GET.get('page')
     patient_objects = paginator.get_page(page)
     return render(request, 'visitors/show_patient.html', {

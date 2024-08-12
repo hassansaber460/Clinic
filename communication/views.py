@@ -11,7 +11,24 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 import pytz
 
-from visitors.models import MedicalRap
+from visitors.models import MedicalRap, Patient
+
+
+def split_name(full_name):
+    parts = full_name.split()
+    first_name = parts[0]
+    last_name = ' '.join(parts[1:]) if len(parts) > 1 else ''
+    return first_name, last_name
+
+
+def search(request):
+    patient_name = request.GET.get('search')
+    if patient_name != '' and patient_name is not None:
+        name = split_name(patient_name)
+        patient_objects = Patient.objects.filter(
+            Q(firstName__icontains=name[0]) | Q(lastName__icontains=name[1]) | Q(ssn=patient_name))
+        return patient_objects
+    return None
 
 
 # Create your views here.
@@ -71,6 +88,10 @@ def show_index_for_doctor(request):
     examinations_end = get_examinations_end_for_doctor(request.user.username)
     examinations_not_end_objects = create_paginator(request, examinations_not_end, 5)
     examinations_end_objects = create_paginator(request, examinations_end, 5)
+    patient = search(request)
+    if patient:
+        patient_objects = create_paginator(request, patient, 5)
+        return render(request, 'visitors/show_patient.html', {'patient_objects': patient_objects})
     return render(request, 'index/show_index_for_doctor.html', {
         'examinations_not_end_objects': examinations_not_end_objects,
         'examinations_end_objects': examinations_end_objects

@@ -1,5 +1,5 @@
 from datetime import datetime
-
+from django.db.models import Q
 from django.core.paginator import Paginator
 from django.db.models import Max
 from django.http import JsonResponse
@@ -19,6 +19,13 @@ from django.template.loader import render_to_string
 from weasyprint import HTML, CSS
 from django.conf import settings
 import os
+
+
+def split_name(full_name):
+    parts = full_name.split()
+    first_name = parts[0]
+    last_name = ' '.join(parts[1:]) if len(parts) > 1 else ''
+    return first_name, last_name
 
 
 def render_pdf_view(request, startExamination_id):
@@ -300,3 +307,5 @@ def post_medical_reports(request, patient_id):
         form_medical_reports = MedicalReportsForm(default_medical=f"{doctor}")
     return render(request, 'services/post_medical_reports.html',
                   {'form_medical_reports': form_medical_reports, 'patient': patient})
+
+
